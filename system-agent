@@ -19,7 +19,8 @@ for arg in "$@"; do
 done
 
 if command -v ldconfig >/dev/null 2>&1; then
-  layer_shell_lib="$(ldconfig -p 2>/dev/null | sed -n '/libgtk4-layer-shell\.so/{s/.* => //;p;q;}')"
+  ldconfig_output="$(ldconfig -p 2>/dev/null || true)"
+  layer_shell_lib="$(printf '%s\n' "$ldconfig_output" | sed -n '/libgtk4-layer-shell\.so/{s/.* => //;p;q;}')"
   if [[ -n "${layer_shell_lib:-}" ]]; then
     export LD_PRELOAD="${layer_shell_lib}${LD_PRELOAD:+:${LD_PRELOAD}}"
   fi
