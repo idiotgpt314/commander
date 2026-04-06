@@ -34,6 +34,18 @@ def default_config():
         "voice": {
             "model_dir": str(MODEL_DIR),
         },
+        "ui": {
+            "panel_width": 680,
+            "prompt_height": 72,
+            "send_button_width": 68,
+            "top_margin": 96,
+            "side_margin": 420,
+            "window_radius": 24,
+            "prompt_radius": 22,
+            "opacity": 0.76,
+            "horizontal_align": "center",
+            "vertical_align": "top",
+        },
         "system_instructions": [
             "You are the local System Agent Harness for this Linux machine.",
             "Fulfill the user's request by directly operating the local system when appropriate.",
@@ -162,7 +174,7 @@ def load_config():
 
 
 def list_provider_names():
-    return sorted(default_config().get("presets", {}).keys())
+    return sorted(load_config().get("presets", {}).keys())
 
 
 def set_provider(name):
@@ -173,6 +185,18 @@ def set_provider(name):
         raise ValueError(f"unknown provider: {name}")
     data["provider"] = name
     data["use_provider_preset"] = True
+    save_json(CONFIG_FILE, data)
+    return load_config()
+
+
+def update_config(patch):
+    ensure_config()
+    data = load_json(CONFIG_FILE, default_config())
+    for key, value in patch.items():
+        if isinstance(value, dict) and isinstance(data.get(key), dict):
+            data[key].update(value)
+        else:
+            data[key] = value
     save_json(CONFIG_FILE, data)
     return load_config()
 

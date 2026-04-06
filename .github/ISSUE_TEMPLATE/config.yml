@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Commander Discussions
+    url: https://github.com/idiotgpt314/commander/discussions
+    about: Use discussions for ideas that are not actionable bugs yet.

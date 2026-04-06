@@ -10,3 +10,9 @@ trainer-state.json
 playbook.json
 prompt-memory.json
 *.log
+feedback-digest.json
+council-report.json
+packaging/arch/pkg/
+packaging/arch/src/
+packaging/debian/pkgroot/
+packaging/debian/*.deb

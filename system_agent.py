@@ -25,10 +25,12 @@ from harness_config import (
     ROOT,
     append_log,
     build_runner_command,
+    default_config,
     ensure_config,
     list_provider_names,
     load_config,
     set_provider,
+    update_config,
 )
 
 APP_ID = "local.system.agent"
@@ -94,7 +96,6 @@ def record_prompt_usage(prompt):
 class SystemAgentWindow(Adw.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app, title="System Agent")
-        self.set_default_size(680, 124)
         self.set_hide_on_close(False)
         self.set_decorated(False)
         self.set_resizable(False)
@@ -109,12 +110,6 @@ class SystemAgentWindow(Adw.ApplicationWindow):
         Gtk4LayerShell.init_for_window(self)
         Gtk4LayerShell.set_layer(self, Gtk4LayerShell.Layer.OVERLAY)
         Gtk4LayerShell.set_keyboard_mode(self, Gtk4LayerShell.KeyboardMode.ON_DEMAND)
-        Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.TOP, True)
-        Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.LEFT, True)
-        Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.RIGHT, True)
-        Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.TOP, 96)
-        Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.LEFT, 420)
-        Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.RIGHT, 420)
         Gtk4LayerShell.set_namespace(self, "system-agent-overlay")
 
         outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -125,6 +120,13 @@ class SystemAgentWindow(Adw.ApplicationWindow):
 
         chrome_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         chrome_row.set_halign(Gtk.Align.END)
+
+        self.settings_button = Gtk.Button()
+        self.settings_button.add_css_class("flat")
+        self.settings_button.add_css_class("close-chip")
+        self.settings_button.set_size_request(28, 28)
+        self.settings_button.set_child(Gtk.Image.new_from_icon_name("emblem-system-symbolic"))
+        chrome_row.append(self.settings_button)
 
         self.close_button = Gtk.Button(label="×")
         self.close_button.add_css_class("flat")
@@ -144,11 +146,11 @@ class SystemAgentWindow(Adw.ApplicationWindow):
         self.prompt_view.set_right_margin(14)
         self.prompt_view.set_size_request(-1, 72)
 
-        frame = Gtk.Frame()
-        frame.set_child(self.prompt_view)
-        frame.set_hexpand(True)
-        frame.add_css_class("prompt-shell")
-        input_row.append(frame)
+        self.prompt_frame = Gtk.Frame()
+        self.prompt_frame.set_child(self.prompt_view)
+        self.prompt_frame.set_hexpand(True)
+        self.prompt_frame.add_css_class("prompt-shell")
+        input_row.append(self.prompt_frame)
 
         self.send_button = Gtk.Button(label="Send")
         self.send_button.add_css_class("send-chip")
@@ -159,27 +161,117 @@ class SystemAgentWindow(Adw.ApplicationWindow):
         outer.append(input_row)
 
         self.set_content(outer)
+        self.settings_popover = self._build_settings_popover()
+        self.settings_button.connect("clicked", self.on_settings_clicked)
         self._install_css()
         self._install_key_controller()
+        self.apply_ui_settings()
+
+    def _build_settings_popover(self):
+        popover = Gtk.Popover()
+        popover.set_has_arrow(False)
+        popover.set_parent(self.settings_button)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        box.set_margin_top(12)
+        box.set_margin_bottom(12)
+        box.set_margin_start(12)
+        box.set_margin_end(12)
+
+        title = Gtk.Label(label="Settings", xalign=0)
+        title.add_css_class("title-4")
+        box.append(title)
+
+        provider_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        provider_row.append(Gtk.Label(label="Provider", xalign=0))
+        self.provider_model = Gtk.StringList.new(list_provider_names())
+        self.provider_dropdown = Gtk.DropDown(model=self.provider_model)
+        self.provider_dropdown.set_hexpand(True)
+        provider_row.append(self.provider_dropdown)
+        box.append(provider_row)
+
+        self.width_spin = self._spin_row(box, "Width", 420, 1400, 10)
+        self.prompt_height_spin = self._spin_row(box, "Prompt Height", 48, 180, 4)
+        self.send_width_spin = self._spin_row(box, "Send Width", 52, 140, 4)
+        self.top_margin_spin = self._spin_row(box, "Top Margin", 0, 800, 8)
+        self.side_margin_spin = self._spin_row(box, "Side Margin", 0, 900, 8)
+        self.window_radius_spin = self._spin_row(box, "Panel Radius", 8, 40, 1)
+        self.prompt_radius_spin = self._spin_row(box, "Prompt Radius", 8, 40, 1)
+        self.opacity_spin = self._spin_row(box, "Opacity %", 35, 100, 1)
+
+        align_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        align_row.append(Gtk.Label(label="Horizontal", xalign=0))
+        self.align_model = Gtk.StringList.new(["center", "left", "right"])
+        self.align_dropdown = Gtk.DropDown(model=self.align_model)
+        self.align_dropdown.set_hexpand(True)
+        align_row.append(self.align_dropdown)
+        box.append(align_row)
+
+        vertical_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        vertical_row.append(Gtk.Label(label="Vertical", xalign=0))
+        self.vertical_model = Gtk.StringList.new(["top", "center", "bottom"])
+        self.vertical_dropdown = Gtk.DropDown(model=self.vertical_model)
+        self.vertical_dropdown.set_hexpand(True)
+        vertical_row.append(self.vertical_dropdown)
+        box.append(vertical_row)
+
+        button_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        save_button = Gtk.Button(label="Save")
+        save_button.add_css_class("suggested-action")
+        save_button.connect("clicked", self.on_save_settings)
+        button_row.append(save_button)
+        reset_button = Gtk.Button(label="Reset")
+        reset_button.connect("clicked", self.on_reset_settings)
+        button_row.append(reset_button)
+        box.append(button_row)
+
+        popover.set_child(box)
+        return popover
+
+    def _spin_row(self, container, label, lower, upper, step):
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        row.append(Gtk.Label(label=label, xalign=0))
+        spin = Gtk.SpinButton.new_with_range(lower, upper, step)
+        spin.set_hexpand(True)
+        row.append(spin)
+        container.append(row)
+        return spin
+
+    def _set_dropdown_value(self, dropdown, model, value):
+        for idx in range(model.get_n_items()):
+            if model.get_string(idx) == value:
+                dropdown.set_selected(idx)
+                return
+        dropdown.set_selected(0)
+
+    def _get_dropdown_value(self, dropdown, model):
+        index = dropdown.get_selected()
+        if index == Gtk.INVALID_LIST_POSITION:
+            return model.get_string(0)
+        return model.get_string(index)
 
     def _install_css(self):
+        ui = self.config.get("ui", {})
+        window_radius = int(ui.get("window_radius", 24))
+        prompt_radius = int(ui.get("prompt_radius", 22))
+        opacity = max(0.35, min(1.0, float(ui.get("opacity", 0.76))))
         css = Gtk.CssProvider()
         css.load_from_data(
-            b"""
+            f"""
             window {
-              background: rgba(10, 14, 20, 0.76);
-              border-radius: 24px;
+              background: rgba(10, 14, 20, {opacity});
+              border-radius: {window_radius}px;
             }
             .prompt-shell {
               background: rgba(22, 29, 38, 0.92);
               border: 1px solid rgba(154, 173, 193, 0.18);
-              border-radius: 22px;
+              border-radius: {prompt_radius}px;
               box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
             }
             textview {
               background: transparent;
               color: #eef4fb;
-              border-radius: 22px;
+              border-radius: {prompt_radius}px;
               font-size: 16px;
               caret-color: #eef4fb;
             }
@@ -203,7 +295,7 @@ class SystemAgentWindow(Adw.ApplicationWindow):
               font-size: 18px;
               padding: 0;
             }
-            """
+            """.encode()
         )
         Gtk.StyleContext.add_provider_for_display(
             self.get_display(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
@@ -231,6 +323,120 @@ class SystemAgentWindow(Adw.ApplicationWindow):
 
     def on_close_clicked(self, _button):
         self.close_overlay()
+
+    def on_settings_clicked(self, _button):
+        self.load_settings_widgets()
+        self.settings_popover.popup()
+
+    def load_settings_widgets(self):
+        self.config = load_config()
+        ui = self.config.get("ui", {})
+        self.width_spin.set_value(float(ui.get("panel_width", 680)))
+        self.prompt_height_spin.set_value(float(ui.get("prompt_height", 72)))
+        self.send_width_spin.set_value(float(ui.get("send_button_width", 68)))
+        self.top_margin_spin.set_value(float(ui.get("top_margin", 96)))
+        self.side_margin_spin.set_value(float(ui.get("side_margin", 420)))
+        self.window_radius_spin.set_value(float(ui.get("window_radius", 24)))
+        self.prompt_radius_spin.set_value(float(ui.get("prompt_radius", 22)))
+        self.opacity_spin.set_value(float(ui.get("opacity", 0.76)) * 100.0)
+        self._set_dropdown_value(
+            self.provider_dropdown,
+            self.provider_model,
+            self.config.get("provider", "codex"),
+        )
+        self._set_dropdown_value(
+            self.align_dropdown,
+            self.align_model,
+            ui.get("horizontal_align", "center"),
+        )
+        self._set_dropdown_value(
+            self.vertical_dropdown,
+            self.vertical_model,
+            ui.get("vertical_align", "top"),
+        )
+
+    def on_save_settings(self, _button):
+        provider = self._get_dropdown_value(self.provider_dropdown, self.provider_model)
+        horizontal_align = self._get_dropdown_value(self.align_dropdown, self.align_model)
+        vertical_align = self._get_dropdown_value(self.vertical_dropdown, self.vertical_model)
+        updated = update_config(
+            {
+                "provider": provider,
+                "use_provider_preset": True,
+                "ui": {
+                    "panel_width": int(self.width_spin.get_value()),
+                    "prompt_height": int(self.prompt_height_spin.get_value()),
+                    "send_button_width": int(self.send_width_spin.get_value()),
+                    "top_margin": int(self.top_margin_spin.get_value()),
+                    "side_margin": int(self.side_margin_spin.get_value()),
+                    "window_radius": int(self.window_radius_spin.get_value()),
+                    "prompt_radius": int(self.prompt_radius_spin.get_value()),
+                    "opacity": round(self.opacity_spin.get_value() / 100.0, 2),
+                    "horizontal_align": horizontal_align,
+                    "vertical_align": vertical_align,
+                },
+            }
+        )
+        self.config = updated
+        self.apply_ui_settings()
+        self.set_status("Saved")
+        self.settings_popover.popdown()
+
+    def on_reset_settings(self, _button):
+        defaults = default_config()
+        update_config(defaults)
+        self.config = load_config()
+        self.load_settings_widgets()
+        self.apply_ui_settings()
+
+    def apply_ui_settings(self):
+        self.config = load_config()
+        ui = self.config.get("ui", {})
+        panel_width = int(ui.get("panel_width", 680))
+        prompt_height = int(ui.get("prompt_height", 72))
+        send_button_width = int(ui.get("send_button_width", 68))
+        top_margin = int(ui.get("top_margin", 96))
+        side_margin = int(ui.get("side_margin", 420))
+        horizontal_align = ui.get("horizontal_align", "center")
+        vertical_align = ui.get("vertical_align", "top")
+
+        self.set_default_size(panel_width, 124)
+        self.prompt_view.set_size_request(-1, prompt_height)
+        self.send_button.set_size_request(send_button_width, 40)
+
+        if vertical_align == "bottom":
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.TOP, False)
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.BOTTOM, True)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.TOP, 0)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.BOTTOM, top_margin)
+        elif vertical_align == "center":
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.TOP, True)
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.BOTTOM, True)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.TOP, top_margin)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.BOTTOM, top_margin)
+        else:
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.TOP, True)
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.BOTTOM, False)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.TOP, top_margin)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.BOTTOM, 0)
+
+        if horizontal_align == "left":
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.LEFT, True)
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.RIGHT, False)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.LEFT, side_margin)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.RIGHT, 0)
+        elif horizontal_align == "right":
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.LEFT, False)
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.RIGHT, True)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.RIGHT, side_margin)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.LEFT, 0)
+        else:
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.LEFT, True)
+            Gtk4LayerShell.set_anchor(self, Gtk4LayerShell.Edge.RIGHT, True)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.LEFT, side_margin)
+            Gtk4LayerShell.set_margin(self, Gtk4LayerShell.Edge.RIGHT, side_margin)
+
+        self._install_css()
 
     def set_status(self, message):
         if self.voice_mode:

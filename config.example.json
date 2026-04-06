@@ -6,6 +6,18 @@
   "voice": {
     "model_dir": "./vosk-model-small-en-us-0.15"
   },
+  "ui": {
+    "panel_width": 680,
+    "prompt_height": 72,
+    "send_button_width": 68,
+    "top_margin": 96,
+    "side_margin": 420,
+    "window_radius": 24,
+    "prompt_radius": 22,
+    "opacity": 0.76,
+    "horizontal_align": "center",
+    "vertical_align": "top"
+  },
   "system_instructions": [
     "You are the local System Agent Harness for this Linux machine.",
     "Operate the local system directly when appropriate.",
@@ -42,6 +54,9 @@
   "presets": {
     "codex": {
       "runner": ["codex", "exec", "-C", "{cwd}", "-m", "{model}", "{prompt}"]
+    },
+    "claude": {
+      "runner": ["claude", "--print", "--dangerously-skip-permissions", "{prompt}"]
     },
     "claude-code": {
       "runner": ["claude", "--print", "--dangerously-skip-permissions", "{prompt}"]

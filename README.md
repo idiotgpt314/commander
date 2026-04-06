@@ -17,6 +17,7 @@ Commander is no longer hardwired to `codex exec`. It is now a harness with:
 - double tap `Super` for text mode
 - hold `Super` for voice capture
 - release `Super` to transcribe and submit
+- gear icon on the prompt panel for provider, size, shape, opacity, and position settings
 - background trainer learns from built-in scenarios plus repeated real prompts
 
 ## Runtime Paths
@@ -77,6 +78,21 @@ Examples:
 
 Any custom CLI can be used as long as it accepts a prompt through the command array.
 
+## Prompt Panel Settings
+
+Use the gear icon on the overlay to change:
+
+- provider
+- panel width
+- prompt height
+- send button width
+- panel and prompt corner radius
+- opacity
+- horizontal position
+- vertical position
+
+Settings persist in `~/.config/system-agent-harness/config.json`.
+
 ## Install
 
 Run:
@@ -127,4 +143,14 @@ The QEMU script currently validates host readiness and target selection. Full bo
 ## Packaging
 
 - Arch/AUR source package: [PKGBUILD](/home/lil-archy4/Work/system-agent/packaging/arch/PKGBUILD)
+- Debian package builder: [build-deb.sh](/home/lil-archy4/Work/system-agent/packaging/debian/build-deb.sh)
 - Release notes: [RELEASING.md](/home/lil-archy4/Work/system-agent/packaging/RELEASING.md)
+
+## Maintenance And Roadmap
+
+- maintainer loop: [MAINTAINERS.md](/home/lil-archy4/Work/system-agent/MAINTAINERS.md)
+- council rubric: [COUNCIL.md](/home/lil-archy4/Work/system-agent/COUNCIL.md)
+- growth plan: [GROWTH.md](/home/lil-archy4/Work/system-agent/GROWTH.md)
+- monetization plan: [MONETIZATION.md](/home/lil-archy4/Work/system-agent/MONETIZATION.md)
+- feedback digest: `./scripts/feedback_digest.py`
+- council report: `./scripts/council_report.py`

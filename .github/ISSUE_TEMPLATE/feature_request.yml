@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a feature or workflow improvement
+title: "[feature] "
+labels: ["feature", "needs-council"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user pain does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the cleanest version of the feature.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks
+      description: Complexity, clutter, reliability, packaging, or maintenance concerns.
