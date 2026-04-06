@@ -112,6 +112,18 @@ def default_config():
                     "{prompt}",
                 ]
             },
+            "chatgpt": {
+                "runner": [
+                    "chatgpt",
+                    "{prompt}",
+                ]
+            },
+            "openai": {
+                "runner": [
+                    "chatgpt",
+                    "{prompt}",
+                ]
+            },
             "openclaw": {
                 "runner": [
                     "openclaw",
@@ -125,6 +137,9 @@ def default_config():
             },
             "ollama": {
                 "runner": ["ollama", "run", "{model}", "{prompt}"]
+            },
+            "gemini": {
+                "runner": ["gemini", "-p", "{prompt}"]
             },
             "custom": {
                 "runner": ["your-agent-command", "--cwd", "{cwd}", "--model", "{model}", "{prompt}"]

@@ -1,5 +1,5 @@
 Name:           commander
-Version:        0.2.1
+Version:        0.2.2
 Release:        1%{?dist}
 Summary:        Wayland overlay AI harness with voice and text control
 License:        Custom

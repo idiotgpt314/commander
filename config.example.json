@@ -61,8 +61,17 @@
     "claude-code": {
       "runner": ["claude", "--print", "--dangerously-skip-permissions", "{prompt}"]
     },
+    "chatgpt": {
+      "runner": ["chatgpt", "{prompt}"]
+    },
+    "openai": {
+      "runner": ["chatgpt", "{prompt}"]
+    },
     "openclaw": {
       "runner": ["openclaw", "run", "--cwd", "{cwd}", "--model", "{model}", "{prompt}"]
+    },
+    "gemini": {
+      "runner": ["gemini", "-p", "{prompt}"]
     },
     "ollama": {
       "runner": ["ollama", "run", "{model}", "{prompt}"]

@@ -1,0 +1,33 @@
+name: Release Packages
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-debian:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install packaging tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev
+
+      - name: Build Debian package
+        run: |
+          chmod +x packaging/debian/build-deb.sh
+          ./packaging/debian/build-deb.sh
+
+      - name: Upload release asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${GITHUB_REF_NAME}" packaging/debian/commander_$(cat VERSION)_amd64.deb --clobber

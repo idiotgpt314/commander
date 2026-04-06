@@ -37,6 +37,7 @@ APP_ID = "local.system.agent"
 STATE_FILE = Path("/tmp/system-agent-state.json")
 DOUBLE_TAP_WINDOW = 0.35
 HOLD_GUARD_WINDOW = 0.9
+VOICE_HOLD_THRESHOLD = 0.42
 
 
 def load_playbook_hints():
@@ -643,6 +644,27 @@ def write_state(data):
     STATE_FILE.write_text(json.dumps(data))
 
 
+def _background_command():
+    return [str(ROOT / "system-agent"), "--show"]
+
+
+def _voice_start_command():
+    return [str(ROOT / "system-agent"), "--voice-start"]
+
+
+def _voice_stop_command():
+    return [str(ROOT / "system-agent"), "--voice-stop-submit"]
+
+
+def _launch_detached(command):
+    subprocess.Popen(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+
+
 def handle_tap_trigger():
     state = read_state()
     now = time.time()
@@ -656,7 +678,7 @@ def handle_tap_trigger():
     if now - last_tap < DOUBLE_TAP_WINDOW:
         state["last_tap"] = 0
         write_state(state)
-        subprocess.run([str(ROOT / "system-agent"), "--show"], check=False)
+        _launch_detached(_background_command())
         return 0
 
     state["last_tap"] = now
@@ -667,14 +689,57 @@ def handle_tap_trigger():
 def handle_voice_trigger_start():
     state = read_state()
     state["last_hold"] = time.time()
+    state["press_started_at"] = state["last_hold"]
+    state["voice_started"] = False
     write_state(state)
-    subprocess.run([str(ROOT / "system-agent"), "--voice-start"], check=False)
     return 0
 
 
 def handle_voice_trigger_stop():
-    subprocess.run([str(ROOT / "system-agent"), "--voice-stop-submit"], check=False)
+    state = read_state()
+    if state.get("voice_started"):
+        state["voice_started"] = False
+        state["last_hold"] = time.time()
+        write_state(state)
+        _launch_detached(_voice_stop_command())
     return 0
+
+
+def handle_super_press():
+    state = read_state()
+    now = time.time()
+    state["press_started_at"] = now
+    state["voice_started"] = False
+    write_state(state)
+    _launch_detached([str(ROOT / "system-agent"), "--maybe-voice-start"])
+    return 0
+
+
+def handle_maybe_voice_start():
+    time.sleep(VOICE_HOLD_THRESHOLD)
+    state = read_state()
+    pressed_at = float(state.get("press_started_at", 0) or 0)
+    if not pressed_at:
+        return 0
+    if time.time() - pressed_at < VOICE_HOLD_THRESHOLD:
+        return 0
+    if state.get("voice_started"):
+        return 0
+    state["voice_started"] = True
+    state["last_hold"] = time.time()
+    write_state(state)
+    _launch_detached(_voice_start_command())
+    return 0
+
+
+def handle_super_release():
+    state = read_state()
+    voice_started = bool(state.get("voice_started"))
+    state["press_started_at"] = 0
+    write_state(state)
+    if voice_started:
+        return handle_voice_trigger_stop()
+    return handle_tap_trigger()
 
 
 def main():
@@ -700,6 +765,12 @@ def main():
         raise SystemExit(0)
     if "--tap" in args:
         raise SystemExit(handle_tap_trigger())
+    if "--super-press" in args:
+        raise SystemExit(handle_super_press())
+    if "--super-release" in args:
+        raise SystemExit(handle_super_release())
+    if "--maybe-voice-start" in args:
+        raise SystemExit(handle_maybe_voice_start())
     if "--voice-trigger-start" in args:
         raise SystemExit(handle_voice_trigger_start())
     if "--voice-trigger-stop" in args:

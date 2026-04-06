@@ -78,6 +78,20 @@ Examples:
 
 Any custom CLI can be used as long as it accepts a prompt through the command array.
 
+Named presets shipped by default:
+
+- `codex`
+- `claude`
+- `claude-code`
+- `chatgpt`
+- `openai`
+- `gemini`
+- `openclaw`
+- `ollama`
+- `custom`
+
+`chatgpt` and `gemini` are CLI presets. They will work once the matching local CLI is installed and available on `PATH`.
+
 ## Prompt Panel Settings
 
 Use the gear icon on the overlay to change:
