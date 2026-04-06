@@ -668,6 +668,8 @@ def _launch_detached(command):
 def handle_tap_trigger():
     state = read_state()
     now = time.time()
+    state["press_started_at"] = 0
+    state["voice_started"] = False
     last_hold = state.get("last_hold", 0)
     if now - last_hold < HOLD_GUARD_WINDOW:
         state["last_tap"] = 0
@@ -711,7 +713,7 @@ def handle_super_press():
     state["press_started_at"] = now
     state["voice_started"] = False
     write_state(state)
-    _launch_detached([str(ROOT / "system-agent"), "--maybe-voice-start"])
+    _launch_detached([os.sys.executable, str(ROOT / "system_agent.py"), "--maybe-voice-start"])
     return 0
 
 

@@ -13,7 +13,7 @@ if [[ ! -x "$PYTHON_BIN" && -f /usr/lib/commander/system_agent.py ]]; then
 fi
 
 for arg in "$@"; do
-  if [[ "$arg" == "--print-config" || "$arg" == "--init-config" ]]; then
+  if [[ "$arg" == "--print-config" || "$arg" == "--init-config" || "$arg" == "--tap" || "$arg" == "--super-press" || "$arg" == "--super-release" || "$arg" == "--maybe-voice-start" || "$arg" == "--voice-trigger-start" || "$arg" == "--voice-trigger-stop" ]]; then
     exec "$PYTHON_BIN" "$APP_DIR/system_agent.py" "$@"
   fi
 done
