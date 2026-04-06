@@ -258,43 +258,43 @@ class SystemAgentWindow(Adw.ApplicationWindow):
         css = Gtk.CssProvider()
         css.load_from_data(
             f"""
-            window {
+            window {{
               background: rgba(10, 14, 20, {opacity});
               border-radius: {window_radius}px;
-            }
-            .prompt-shell {
+            }}
+            .prompt-shell {{
               background: rgba(22, 29, 38, 0.92);
               border: 1px solid rgba(154, 173, 193, 0.18);
               border-radius: {prompt_radius}px;
               box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
-            }
-            textview {
+            }}
+            textview {{
               background: transparent;
               color: #eef4fb;
               border-radius: {prompt_radius}px;
               font-size: 16px;
               caret-color: #eef4fb;
-            }
-            textview text {
+            }}
+            textview text {{
               background: transparent;
-            }
-            .send-chip, .close-chip {
+            }}
+            .send-chip, .close-chip {{
               border-radius: 999px;
               min-height: 0;
               min-width: 0;
-            }
-            .send-chip {
+            }}
+            .send-chip {{
               background: #eef4fb;
               color: #0c1117;
               font-weight: 700;
               padding: 0 14px;
-            }
-            .close-chip {
+            }}
+            .close-chip {{
               background: rgba(238, 244, 251, 0.08);
               color: #c8d3df;
               font-size: 18px;
               padding: 0;
-            }
+            }}
             """.encode()
         )
         Gtk.StyleContext.add_provider_for_display(

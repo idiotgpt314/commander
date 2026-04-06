@@ -1,6 +1,6 @@
 pkgbase = commander
 	pkgdesc = Wayland overlay AI harness with voice/text control and self-training
-	pkgver = 0.2.0
+	pkgver = 0.2.1
 	pkgrel = 1
 	url = https://github.com/idiotgpt314/commander
 	install = commander.install
@@ -14,7 +14,7 @@ pkgbase = commander
 	depends = libadwaita
 	depends = gtk4-layer-shell
 	depends = pipewire
-	source = commander-0.2.0.tar.gz::https://github.com/idiotgpt314/commander/archive/refs/tags/v0.2.0.tar.gz
+	source = commander-0.2.1.tar.gz::https://github.com/idiotgpt314/commander/archive/refs/tags/v0.2.1.tar.gz
 	sha256sums = SKIP
 
 pkgname = commander
