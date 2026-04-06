@@ -1,5 +1,5 @@
 Name:           commander
-Version:        0.1.1
+Version:        0.1.2
 Release:        1%{?dist}
 Summary:        Wayland overlay AI harness with voice and text control
 License:        Custom
@@ -35,5 +35,5 @@ install -Dm755 commander-trainer %{buildroot}/usr/bin/commander-trainer
 /usr/lib/commander
 
 %changelog
-* Sun Apr 06 2026 Commander Maintainer <noreply@example.com> - 0.1.1-1
-- Fix packaged launcher path behavior
+* Sun Apr 06 2026 Commander Maintainer <noreply@example.com> - 0.1.2-1
+- Fix packaged background startup behavior

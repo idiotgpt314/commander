@@ -2,7 +2,7 @@
 Description=System Agent Harness Overlay
 
 [Service]
-ExecStart=/usr/bin/commander --background
+ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libgtk4-layer-shell.so.0 /usr/bin/python /usr/lib/commander/system_agent.py --background
 Restart=on-failure
 
 [Install]
