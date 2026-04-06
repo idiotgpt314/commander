@@ -1,0 +1,49 @@
+pkgname=commander
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Wayland overlay AI harness with voice/text control and self-training"
+arch=('x86_64')
+url="https://github.com/idiotgpt314/commander"
+license=('custom')
+depends=(
+  'python'
+  'python-gobject'
+  'python-vosk'
+  'gtk4'
+  'libadwaita'
+  'gtk4-layer-shell'
+  'pipewire'
+)
+makedepends=('git')
+source=(
+  "$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz"
+)
+sha256sums=('SKIP')
+install="$pkgname.install"
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  install -dm755 "$pkgdir/usr/lib/$pkgname"
+  cp -r \
+    harness_config.py \
+    system_agent.py \
+    system_agent_trainer.py \
+    scenarios.json \
+    release-targets.json \
+    config.example.json \
+    README.md \
+    VERSION \
+    packaging \
+    scripts \
+    vosk-model-small-en-us-0.15 \
+    "$pkgdir/usr/lib/$pkgname/"
+
+  install -Dm755 system-agent "$pkgdir/usr/lib/$pkgname/system-agent"
+  install -Dm755 system-agent-trainer "$pkgdir/usr/lib/$pkgname/system-agent-trainer"
+  install -Dm755 commander "$pkgdir/usr/bin/commander"
+  install -Dm755 commander-trainer "$pkgdir/usr/bin/commander-trainer"
+  install -Dm644 packaging/systemd/system-agent.service "$pkgdir/usr/share/commander/systemd/system-agent.service"
+  install -Dm644 packaging/systemd/system-agent-trainer.service "$pkgdir/usr/share/commander/systemd/system-agent-trainer.service"
+  install -Dm644 packaging/hyprland/system-agent.conf "$pkgdir/usr/share/commander/hyprland/commander.conf"
+}

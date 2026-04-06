@@ -1,0 +1,9 @@
+[Unit]
+Description=System Agent Harness Overlay
+
+[Service]
+ExecStart=/usr/bin/commander --background
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

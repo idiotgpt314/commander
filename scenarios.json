@@ -1,0 +1,34 @@
+{
+  "scenarios": [
+    {
+      "id": "debug-desktop-app",
+      "category": "debugging",
+      "title": "Debug a broken local app",
+      "prompt": "A desktop app launches but crashes after a few seconds. Figure out the best workflow to inspect logs, reproduce, patch if possible, and verify."
+    },
+    {
+      "id": "deploy-web-app",
+      "category": "deployment",
+      "title": "Deploy and verify a web app",
+      "prompt": "A local project needs to be pushed to GitHub and deployed to Vercel with verification that the production URL works."
+    },
+    {
+      "id": "review-change-debate",
+      "category": "planning",
+      "title": "Debate a risky refactor",
+      "prompt": "A user wants a risky refactor. Determine the best way for the system agent to debate tradeoffs before code changes are made."
+    },
+    {
+      "id": "browser-automation-flow",
+      "category": "browser",
+      "title": "Handle a web workflow",
+      "prompt": "The user wants the machine to log into a site, navigate a few pages, and extract useful information with screenshots if needed."
+    },
+    {
+      "id": "system-file-hunt",
+      "category": "system",
+      "title": "Find and change the right config",
+      "prompt": "The user asks for a system-level behavior change but does not know which config file or command controls it."
+    }
+  ]
+}

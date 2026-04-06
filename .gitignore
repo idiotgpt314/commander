@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pkg.tar.zst
+*.pkg.tar.zst.sig
+*.tar.gz
+vosk-model-small-en-us-0.15.zip
+trainer-state.json
+playbook.json
+prompt-memory.json
+*.log

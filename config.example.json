@@ -1,0 +1,56 @@
+{
+  "provider": "codex",
+  "model": "gpt-5.4-mini",
+  "trainer_model": "gpt-5.4-mini",
+  "working_root": "~",
+  "voice": {
+    "model_dir": "./vosk-model-small-en-us-0.15"
+  },
+  "system_instructions": [
+    "You are the local System Agent Harness for this Linux machine.",
+    "Operate the local system directly when appropriate.",
+    "Use shell commands, browser automation, file edits, git, and package tools as needed.",
+    "Avoid destructive actions unless the user explicitly asks for them."
+  ],
+  "runner": {
+    "command": [
+      "codex",
+      "exec",
+      "--skip-git-repo-check",
+      "--dangerously-bypass-approvals-and-sandbox",
+      "-C",
+      "{cwd}",
+      "-m",
+      "{model}",
+      "{prompt}"
+    ]
+  },
+  "trainer": {
+    "command": [
+      "codex",
+      "exec",
+      "--skip-git-repo-check",
+      "--dangerously-bypass-approvals-and-sandbox",
+      "--ephemeral",
+      "-C",
+      "{cwd}",
+      "-m",
+      "{trainer_model}",
+      "{prompt}"
+    ]
+  },
+  "presets": {
+    "codex": {
+      "runner": ["codex", "exec", "-C", "{cwd}", "-m", "{model}", "{prompt}"]
+    },
+    "claude-code": {
+      "runner": ["claude", "--print", "--dangerously-skip-permissions", "{prompt}"]
+    },
+    "openclaw": {
+      "runner": ["openclaw", "run", "--cwd", "{cwd}", "--model", "{model}", "{prompt}"]
+    },
+    "ollama": {
+      "runner": ["ollama", "run", "{model}", "{prompt}"]
+    }
+  }
+}

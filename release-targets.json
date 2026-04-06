@@ -1,0 +1,28 @@
+{
+  "targets": [
+    {
+      "id": "ubuntu-24.04-lts",
+      "family": "debian",
+      "status": "supported",
+      "vm_smoke_ready": true,
+      "image_source": "https://cloud-images.ubuntu.com/minimal/releases/noble/release/",
+      "notes": "Primary first-wave target with official cloud image path available for QEMU smoke testing."
+    },
+    {
+      "id": "fedora-43-cloud",
+      "family": "fedora",
+      "status": "supported",
+      "vm_smoke_ready": true,
+      "image_source": "https://www.fedoraproject.org/cloud/download/",
+      "notes": "Primary first-wave target using Fedora Cloud qcow2 images."
+    },
+    {
+      "id": "arch-linux",
+      "family": "arch",
+      "status": "supported",
+      "vm_smoke_ready": false,
+      "image_source": "manual",
+      "notes": "Host install target first; VM image automation can be added after cloud-image parity work."
+    }
+  ]
+}

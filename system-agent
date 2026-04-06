@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+for arg in "$@"; do
+  if [[ "$arg" == "--print-config" || "$arg" == "--init-config" ]]; then
+    exec "$SCRIPT_DIR/.venv/bin/python" "$SCRIPT_DIR/system_agent.py" "$@"
+  fi
+done
+
+if command -v ldconfig >/dev/null 2>&1; then
+  layer_shell_lib="$(ldconfig -p 2>/dev/null | sed -n 's/.* => //p' | rg 'libgtk4-layer-shell\.so' -m1 || true)"
+  if [[ -n "${layer_shell_lib:-}" ]]; then
+    export LD_PRELOAD="${layer_shell_lib}${LD_PRELOAD:+:${LD_PRELOAD}}"
+  fi
+fi
+
+exec "$SCRIPT_DIR/.venv/bin/python" "$SCRIPT_DIR/system_agent.py" "$@"
