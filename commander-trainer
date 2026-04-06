@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -x /usr/lib/commander/system-agent-trainer ]]; then
+  exec /usr/lib/commander/system-agent-trainer "$@"
+fi
 exec "$SCRIPT_DIR/system-agent-trainer" "$@"
